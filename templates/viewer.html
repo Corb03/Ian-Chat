@@ -34,30 +34,6 @@
             {% endfor %}
           </select>
         </form>
-
-        <!-- Optional: keep upload flow (uploads folder) -->
-        <form action="/switch" method="post" enctype="multipart/form-data" id="switch-form">
-          <input
-            type="file"
-            name="html_file"
-            id="html_file"
-            accept=".html"
-            onchange="document.getElementById('switch-form').submit()"
-            style="display:none;"
-          />
-
-          {% if html_filename == "No Channel Selected" %}
-          <button class="channel nochannel" type="button"
-                  onclick="document.getElementById('html_file').click()">
-            Click to Upload Channel
-          </button>
-          {% else %}
-          <button class="channel selected" type="button"
-                  onclick="document.getElementById('html_file').click()">
-            #{{ html_filename[:-5]|lower|replace(' ', '-') }}
-          </button>
-          {% endif %}
-        </form>
       </nav>
     </div>
 
