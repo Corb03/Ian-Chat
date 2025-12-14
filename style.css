@@ -1,0 +1,26 @@
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #2b2d31;
+  color: #ddd;
+}
+
+#topbar {
+  padding: 10px;
+  background: #1e1f22;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+#chat-container {
+  padding: 10px;
+}
+
+select {
+  background: #313338;
+  color: #fff;
+  border: 1px solid #555;
+  padding: 4px;
+}
