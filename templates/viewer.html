@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Discord Channel Viewer
+  </title>
+  <link href="/static/style.css" rel="stylesheet"/>
+ </head>
+ <body>
+  <div class="reply-menu" id="reply-menu" style="display: none;">
+   <button class="reply-button" onclick="replyToSelected()">
+    ↩️ Reply
+   </button>
+  </div>
+  <div class="app">
+   <aside class="sidebar">
+    <div class="sidebar-scrollable">
+     <div class="server-title">
+      Discord Channel Viewer
+     </div>
+     <nav class="channels">
+      <div class="channel-section">
+       CURRENT CHANNEL
+      </div>
+      <form action="/switch" enctype="multipart/form-data" id="switch-form" method="post">
+       <input accept=".html" id="html_file" name="html_file" onchange="document.getElementById('switch-form').submit()" style="display: none;" type="file"/>
+       {% if html_filename == "No Channel Selected" %}
+       <button class="channel nochannel" onclick="document.getElementById('html_file').click()" type="button">
+        Click to Select Channel
+       </button>
+       {% else %}
+       <button class="channel selected" onclick="document.getElementById('html_file').click()" type="button">
+        #{{ html_filename[:-5]|lower|replace(' ', '-') }}
+       </button>
+       {% endif %}
+      </form>
+     </nav>
+    </div>
+    <div class="sidebar-bottom">
+     <button class="jump-button" id="random-message-btn">Random Message</button>
+     <button class="jump-button" id="scroll-jump-btn">Jump to Top</button>
+     <div class="user-status-bar">
+      <div class="user-info-wrapper">
+       <img alt="User Avatar" id="status-avatar" src="/static/avatar.png"/>
+       <div class="user-info">
+        <div class="username">
+         You
+        </div>
+        <div class="status">
+         Invisible
+        </div>
+       </div>
+      </div>
+      <div class="user-icons">
+       <button id="toggle-mic" title="Mute">
+        <img alt="Mic" src="/static/icons/mic.svg"/>
+       </button>
+       <button id="toggle-headphones" title="Deafen">
+        <img alt="Headphones" src="/static/icons/headphones.svg"/>
+       </button>
+       <button id="settings-btn" title="Settings">
+        <img alt="Settings" class="settings-icon" src="/static/icons/settings.svg"/>
+       </button>
+      </div>
+     </div>
+    </div>
+   </aside>
+   <main class="main">
+    <header class="header">
+     <div class="channel-name">
+      {{ "No Channel Selected" if html_filename == "No Channel Selected" else "#" + html_filename[:-5]|lower|replace(" ", "-") }}
+     </div>
+     <div class="search-bar-container">
+      <div class="search-wrapper">
+        <span id="search-count" class="search-count hidden">0 results</span>
+        <input id="search" class="search-input" ... />
+      </div>
+      <button class="search-toggle-button" id="search-toggle">▼</button>
+    </div>
+    </header>
+    <div class="search-help" id="search-help" style="display:none;">
+     <strong>
+      Search Options
+     </strong>
+     <ul>
+      <li data-insert="from:">
+       from: user
+      </li>
+      <li data-insert="has:link">
+       has: link
+      </li>
+      <li data-insert="before:">
+       before: YYYY-MM-DD
+      </li>
+      <li data-insert="during:">
+       during: YYYY-MM-DD
+      </li>
+      <li data-insert="after:">
+       after: YYYY-MM-DD
+      </li>
+      <li data-insert="in:">
+       in: channel
+      </li>
+     </ul>
+    </div>
+    <div class="chatlog" id="chatlog">
+     {% for msg in messages %}
+     <div class="message" id="msg-{{ loop.index }}">
+      <img class="avatar fallback-avatar" data-avatar="{{ msg.avatar }}" data-username="{{ msg.username }}"/>
+      <div class="hover-wrap">
+       <div class="message-content">
+        <div class="meta">
+         <span class="message-nickname">
+          {{ msg.username }}
+         </span>
+         <span class="timestamp">
+          {{ msg.timestamp }}
+         </span>
+        </div>
+        <div class="content">
+         {{ msg.content|safe }}
+        </div>
+       </div>
+      </div>
+      <button class="jump-message-btn" onclick="jumpToMessage('msg-{{ loop.index }}')">
+       Jump
+      </button>
+     </div>
+     {% endfor %}
+    </div>
+    <!-- Slash Command Dropdown -->
+    <div id="slash-dropdown" class="slash-dropdown" style="display: none;">
+      <div class="slash-option" data-command="/nick">
+        <span class="command">/nick</span>
+        <span class="description">Change your nickname</span>
+      </div>
+      <div class="slash-option" data-command="/tableflip">
+        <span class="command">/tableflip</span>
+        <span class="description">(╯°□°）╯︵ ┻━┻</span>
+      </div>
+      <div class="slash-option" data-command="/unflip">
+        <span class="command">/unflip</span>
+        <span class="description">┬─┬ ノ( ゜-゜ノ)</span>
+      </div>
+      <div class="slash-option" data-command="/shrug">
+        <span class="command">/shrug</span>
+        <span class="description">¯\\_(ツ)_/¯</span>
+      </div>
+    </div>
+    <div class="input-area">
+     <textarea id="message-input" placeholder="Message #{{ html_filename[:-5]|lower|replace(' ', '-') }}"></textarea>
+     <button id="send-button">
+      Send
+     </button>
+    </div>
+   </main>
+  </div>
+  <script src="/static/script.js">
+  </script>
+  <div class="settings-overlay" id="settings-overlay" style="display: none;">
+   <div class="settings-container">
+    <div class="settings-sidebar">
+     <div class="settings-section">
+      User Settings
+     </div>
+     <div class="settings-item" data-section="my-account">
+      My Account
+     </div>
+     <div class="settings-item">
+      Profiles
+     </div>
+     <div class="settings-item">
+      Content &amp; Social
+     </div>
+     <div class="settings-item">
+      Data &amp; Privacy
+     </div>
+     <div class="settings-item">
+      Family Center
+     </div>
+     <div class="settings-item">
+      Authorized Apps
+     </div>
+     <div class="settings-item">
+      Devices
+     </div>
+     <div class="settings-item">
+      Connections
+     </div>
+     <div class="settings-item">
+      Clips
+     </div>
+     <div class="settings-section">
+      Billing Settings
+     </div>
+     <div class="settings-item">
+      Nitro
+     </div>
+     <div class="settings-item">
+      Server Boost
+     </div>
+     <div class="settings-item">
+      Subscriptions
+     </div>
+     <div class="settings-item">
+      Gift Inventory
+     </div>
+     <div class="settings-item">
+      Billing
+     </div>
+     <div class="settings-section">
+      App Settings
+     </div>
+     <div class="settings-item">
+      Appearance
+     </div>
+     <div class="settings-item">
+      Accessibility
+     </div>
+     <div class="settings-item">
+      Voice &amp; Video
+     </div>
+     <div class="settings-item">
+      Chat
+     </div>
+     <div class="settings-item">
+      Notifications
+     </div>
+     <div class="settings-item">
+      Keybinds
+     </div>
+     <div class="settings-item">
+      Language
+     </div>
+     <div class="settings-section">
+      Activity Settings
+     </div>
+     <div class="settings-item">
+      Activity Privacy
+     </div>
+     <div class="settings-item">
+      Registered Games
+     </div>
+     <div class="settings-item">
+      Game Overlay
+     </div>
+     <div class="settings-item logout-button">
+      Log Out
+     </div>
+    </div>
+    <div class="settings-content">
+     <div class="settings-body">
+      <div class="my-account" style="display: flex; flex-direction: column; gap: 24px; position: relative;">
+       <div class="settings-header-bar">
+        <div class="settings-header-left">
+         <h2>
+          My Account
+         </h2>
+         <div class="tab-row">
+          <button class="tab active">
+           Security
+          </button>
+          <button class="tab">
+           Standing
+          </button>
+         </div>
+        </div>
+       </div>
+       <button aria-label="Close" class="close-settings" id="close-settings">
+        ✕
+       </button>
+       <div class="profile-container">
+        <div class="profile-banner">
+         <img alt="Profile Banner" src="/static/banner-default.png">
+          <button class="edit-banner">
+           Edit Banner
+          </button>
+          <input accept="image/*" id="banner-input" style="display: none;" type="file"/>
+         </img>
+        </div>
+        <div class="profile-card">
+        <label for="avatar-upload" style="cursor: pointer;">
+          <img alt="Avatar" class="profile-avatar" id="settings-avatar" src="/static/avatar.png"/>
+        </label>
+        <input type="file" id="avatar-upload" accept="image/*" style="display: none;" />
+         <div class="profile-info">
+          <div class="profile-username" id="nickname-display">
+           User
+          </div>
+          <div class="profile-username-alt" id="username-display">
+           @user
+          </div>
+         </div>
+         <button class="edit-profile">
+          Edit User Profile
+         </button>
+        </div>
+        <div class="info-box">
+         <div class="info-row">
+          <label>
+           Display Name
+          </label>
+          <div class="info-row-content">
+           <input id="nickname-input" type="text" value="User"/>
+           <button class="edit-btn" id="nickname-save">
+            Save
+           </button>
+          </div>
+         </div>
+         <div class="info-row">
+          <label>
+           Username
+          </label>
+          <div class="info-row-content">
+           <span id="username-row">
+            @user
+           </span>
+          </div>
+         </div>
+         <div class="info-row">
+          <label>
+           Email
+          </label>
+          <div class="info-row-content">
+           <span>
+            ********@gmail.com
+           </span>
+           <button class="edit-btn">
+            Edit
+           </button>
+          </div>
+         </div>
+         <div class="info-row">
+          <label>
+           Phone Number
+          </label>
+          <div class="info-row-content">
+           <span>
+            ********4188
+           </span>
+           <button class="edit-btn">
+            Edit
+           </button>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+ </body>
+</html>
