@@ -5,26 +5,13 @@ import os
 app = Flask(__name__)
 
 UPLOAD_FOLDER = "uploads"
-HTML_FILENAME = None
+ARCHIVES_FOLDER = "archives"
 
-@app.route("/")
-def home():
-    if not HTML_FILENAME:
-        return render_template(
-            "viewer.html",
-            messages=[],
-            html_filename="No Channel Selected"
-        )
+HTML_FILENAME = None  # keeps your upload flow working
 
-    file_path = os.path.join(UPLOAD_FOLDER, HTML_FILENAME)
 
-    if not os.path.exists(file_path):
-        return render_template(
-            "viewer.html",
-            messages=[],
-            html_filename="File not found"
-        )
-
+def parse_discord_html(file_path: str):
+    """Parse a raw Discord HTML export into the message dicts your viewer expects."""
     with open(file_path, encoding="utf-8") as f:
         soup = BeautifulSoup(f, "html.parser")
 
@@ -42,22 +29,58 @@ def home():
             "avatar": avatar["src"] if avatar and avatar.has_attr("src") else ""
         })
 
+    return messages
+
+
+@app.route("/")
+def home():
+    # Build dropdown list from /archives
+    os.makedirs(ARCHIVES_FOLDER, exist_ok=True)
+    archive_files = sorted([
+        f for f in os.listdir(ARCHIVES_FOLDER)
+        if f.lower().endswith(".html")
+    ])
+
+    selected_archive = request.args.get("archive", "").strip()
+    messages = []
+    html_filename = "No Channel Selected"
+
+    # Priority 1: dropdown selection (/?archive=...)
+    if selected_archive:
+        if selected_archive in archive_files:
+            html_filename = selected_archive
+            file_path = os.path.join(ARCHIVES_FOLDER, selected_archive)
+            messages = parse_discord_html(file_path)
+        else:
+            html_filename = "Invalid archive selection"
+
+    # Priority 2: uploaded file selection (your old behavior)
+    elif HTML_FILENAME:
+        file_path = os.path.join(UPLOAD_FOLDER, HTML_FILENAME)
+        if os.path.exists(file_path):
+            html_filename = HTML_FILENAME
+            messages = parse_discord_html(file_path)
+        else:
+            html_filename = "File not found"
+
     return render_template(
         "viewer.html",
         messages=messages,
-        html_filename=HTML_FILENAME
+        html_filename=html_filename,
+        archive_files=archive_files,
+        selected_archive=selected_archive
     )
 
 
 @app.route("/switch", methods=["POST"])
 def switch():
+    """Optional fallback: upload an HTML export to /uploads and show it."""
     global HTML_FILENAME
 
     if "html_file" not in request.files:
         return "No file uploaded", 400
 
     file = request.files["html_file"]
-
     if file.filename == "":
         return "No selected file", 400
 
@@ -65,7 +88,6 @@ def switch():
         return "Only .html files allowed", 400
 
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
     filepath = os.path.join(UPLOAD_FOLDER, file.filename)
     file.save(filepath)
 
