@@ -1,26 +1,19 @@
-
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
   background: #2b2d31;
-  color: #ddd;
+  color: #dcddde;
+  font-family: system-ui, sans-serif;
 }
 
-#topbar {
-  padding: 10px;
-  background: #1e1f22;
+.top-bar {
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 12px;
+  background: #1e1f22;
+  border-bottom: 1px solid #000;
 }
 
 #chat-container {
-  padding: 10px;
-}
-
-select {
-  background: #313338;
-  color: #fff;
-  border: 1px solid #555;
-  padding: 4px;
+  padding: 16px;
 }
