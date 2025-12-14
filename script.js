@@ -1,27 +1,33 @@
+const chatContainer = document.getElementById("chat-container");
+const archiveSelect = document.getElementById("archiveSelect");
 
-document.getElementById("archiveSelect").addEventListener("change", e => {
-  const path = e.target.value;
-  if (!path) return;
+/* 🔹 LIST YOUR ARCHIVES HERE */
+const ARCHIVES = [
+  "Head Facts.html",
+  "VIP Lounge.html"
+];
 
-  fetch(path)
-    .then(r => r.text())
+/* Populate dropdown */
+ARCHIVES.forEach(file => {
+  const opt = document.createElement("option");
+  opt.value = file;
+  opt.textContent = file.replace(".html", "");
+  archiveSelect.appendChild(opt);
+});
+
+archiveSelect.addEventListener("change", () => {
+  if (!archiveSelect.value) return;
+  loadArchive(archiveSelect.value);
+});
+
+function loadArchive(file) {
+  fetch(`archives/${file}`)
+    .then(res => res.text())
     .then(html => {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, "text/html");
-      const chatlog = doc.querySelector(".chatlog");
-
-      const chat = document.getElementById("chat");
-      chat.innerHTML = "";
-
-      if (!chatlog) {
-        chat.textContent = "Invalid Discord archive.";
-        return;
-      }
-
-      chat.appendChild(chatlog);
+      chatContainer.innerHTML = html;
     })
     .catch(err => {
-      document.getElementById("chat").textContent = "Failed to load archive.";
+      chatContainer.innerHTML = `<p class="error">Failed to load archive.</p>`;
       console.error(err);
     });
-});
+}
