@@ -1,24 +1,23 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>iAN Chat Archive Viewer</title>
+  <title>iAN Chat</title>
+
+  <!-- ✅ RELATIVE PATHS -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="topbar">
-    <h1>iAN Chat</h1>
-    <select id="archiveSelect">
-      <option value="">Select an archive…</option>
-      <!-- Add more archives here -->
-      <option value="archives/Head Facts.html">Head Facts</option>
-    </select>
-  </div>
 
-  <div id="chat-container">
-    <div id="chat"></div>
-  </div>
+  <header class="top-bar">
+    <h1>iAN Chat</h1>
+
+    <select id="archiveSelect">
+      <option value="">Select archive</option>
+    </select>
+  </header>
+
+  <main id="chat-container"></main>
 
   <script src="script.js"></script>
 </body>
