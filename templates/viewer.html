@@ -23,6 +23,19 @@
       <nav class="channels">
         <div class="channel-section">CURRENT CHANNEL</div>
 
+        <!-- ✅ Archive dropdown (files from /archives) -->
+        <form method="GET" action="/" class="archive-picker" style="margin: 8px 0;">
+          <select name="archive" onchange="this.form.submit()" style="width: 100%;">
+            <option value="">Select a channel…</option>
+            {% for f in archive_files %}
+              <option value="{{ f }}" {% if f == selected_archive %}selected{% endif %}>
+                {{ f[:-5] }}
+              </option>
+            {% endfor %}
+          </select>
+        </form>
+
+        <!-- Optional: keep upload flow (uploads folder) -->
         <form action="/switch" method="post" enctype="multipart/form-data" id="switch-form">
           <input
             type="file"
@@ -36,7 +49,7 @@
           {% if html_filename == "No Channel Selected" %}
           <button class="channel nochannel" type="button"
                   onclick="document.getElementById('html_file').click()">
-            Click to Select Channel
+            Click to Upload Channel
           </button>
           {% else %}
           <button class="channel selected" type="button"
