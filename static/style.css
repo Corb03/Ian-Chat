@@ -1399,3 +1399,27 @@ body.searching .message:hover .jump-message-btn {
   background-color: #d22d39;
   color: white;
 }
+
+/* --- Search counter: force left-side, no overlay --- */
+.search-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* stop the counter from being absolute (overlaying the input) */
+.search-bar-container .search-count {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+  padding: 0 6px;
+  min-width: 52px;
+  text-align: right;
+  pointer-events: none;
+}
+
+/* remove the big left padding that was making room for the overlay counter */
+.search-bar-container .search-input {
+  padding-left: 12px !important;
+}
