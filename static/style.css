@@ -421,31 +421,6 @@ html, body {
   margin-bottom: 10px;
 }
 
-/* Light Theme Styles */
-  background-color: #f2f3f5;
-  color: #2e3338;
-}
-
-  background-color: #ffffff;
-  color: #2e3338;
-}
-
-  color: #2e3338;
-}
-
-  background-color: #e3e5e8;
-  border-radius: 6px;
-  padding: 8px;
-}
-
-body.light-mode {
-  background-color: #ffffff;
-  color: #2e3338;
-}
-
-body.light-mode .chatlog {
-  background-color: #ffffff;
-}
 
 /* Main layout */
 body.light-mode .sidebar,
