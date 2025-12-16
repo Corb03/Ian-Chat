@@ -79,10 +79,10 @@
       </div>
 
       <!-- ✅ SEARCH BAR (matches your existing style.css classes) -->
-      <div class="search-bar-container" id="search-bar">
+      <div class="search-bar-container">
+        <span class="search-count" id="search-count">632</span>
+      
         <div class="search-wrapper">
-          <span class="search-count hidden" id="search-count">0</span>
-
           <input
             id="search"
             class="search-input"
@@ -91,23 +91,9 @@
             autocomplete="off"
           />
         </div>
-
-        <button class="search-dropdown-button" id="search-dropdown" type="button" title="Search scope">
-          in:channel
-        </button>
-
-        <button class="search-toggle-button" id="search-toggle" type="button" title="Search tips">
-          ⓘ
-        </button>
+      
+        <button class="search-toggle-button" id="search-toggle" type="button">ⓘ</button>
       </div>
-    </header>
-
-    <!-- ✅ Optional tips panel (only shows if you want it) -->
-    <div class="search-help" id="search-help" hidden style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 13px;">
-      <div style="font-weight: 600; margin-bottom: 6px;">Search tips</div>
-      <div style="margin: 2px 0;">• Type to filter messages (name or text)</div>
-      <div style="margin: 2px 0;">• Esc clears</div>
-    </div>
 
     <!-- CHAT LOG -->
     <div class="chatlog" id="chatlog">
