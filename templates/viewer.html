@@ -77,7 +77,37 @@
         {{ "No Channel Selected" if html_filename == "No Channel Selected"
            else "#" + html_filename[:-5]|lower|replace(" ", "-") }}
       </div>
+
+      <!-- ✅ SEARCH BAR (matches your existing style.css classes) -->
+      <div class="search-bar-container" id="search-bar">
+        <div class="search-wrapper">
+          <span class="search-count hidden" id="search-count">0</span>
+
+          <input
+            id="search"
+            class="search-input"
+            type="text"
+            placeholder="Search messages"
+            autocomplete="off"
+          />
+        </div>
+
+        <button class="search-dropdown-button" id="search-dropdown" type="button" title="Search scope">
+          in:channel
+        </button>
+
+        <button class="search-toggle-button" id="search-toggle" type="button" title="Search tips">
+          ⓘ
+        </button>
+      </div>
     </header>
+
+    <!-- ✅ Optional tips panel (only shows if you want it) -->
+    <div class="search-help" id="search-help" hidden style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 13px;">
+      <div style="font-weight: 600; margin-bottom: 6px;">Search tips</div>
+      <div style="margin: 2px 0;">• Type to filter messages (name or text)</div>
+      <div style="margin: 2px 0;">• Esc clears</div>
+    </div>
 
     <!-- CHAT LOG -->
     <div class="chatlog" id="chatlog">
@@ -120,6 +150,64 @@
 </div>
 
 <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+<!-- ✅ Safe fallback search logic (only runs if your script.js doesn't already wire it) -->
+<script>
+(() => {
+  const input = document.getElementById("search");
+  const count = document.getElementById("search-count");
+  const toggle = document.getElementById("search-toggle");
+  const help = document.getElementById("search-help");
+
+  // If there's no search input, or if your main script already attached a handler, bail.
+  if (!input || input.dataset.wired === "1") return;
+
+  input.dataset.wired = "1";
+
+  const getMessages = () => Array.from(document.querySelectorAll(".message"));
+
+  function setCount(n, total) {
+    if (!count) return;
+    count.textContent = `${n}/${total}`;
+    count.classList.toggle("hidden", n === total && (input.value || "").trim() === "");
+  }
+
+  function applyFilter(q) {
+    const query = (q || "").trim().toLowerCase();
+    const msgs = getMessages();
+    let shown = 0;
+
+    for (const msg of msgs) {
+      const user = (msg.querySelector(".message-nickname")?.textContent || "").toLowerCase();
+      const text = (msg.querySelector(".content")?.textContent || "").toLowerCase();
+      const match = !query || user.includes(query) || text.includes(query);
+      msg.style.display = match ? "" : "none";
+      if (match) shown++;
+    }
+
+    setCount(shown, msgs.length);
+  }
+
+  input.addEventListener("input", () => applyFilter(input.value));
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      input.value = "";
+      applyFilter("");
+      input.blur();
+    }
+  });
+
+  if (toggle && help) {
+    toggle.addEventListener("click", () => {
+      help.hidden = !help.hidden;
+    });
+  }
+
+  // initialize
+  applyFilter("");
+})();
+</script>
 
 </body>
 </html>
