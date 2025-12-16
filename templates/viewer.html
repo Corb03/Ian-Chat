@@ -1,125 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Discord Channel Viewer</title>
-
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
 
-<div class="reply-menu" id="reply-menu" style="display: none;">
-  <button class="reply-button" onclick="replyToSelected()">↩️ Reply</button>
-</div>
-
-<div class="app">
-
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sidebar-scrollable">
-      <div class="server-title">Discord Channel Viewer</div>
-
-      <nav class="channels">
-        <div class="channel-section">CURRENT CHANNEL</div>
-
-        <!-- ✅ Archive dropdown (files from /archives) -->
-        <form method="GET" action="/" class="archive-picker" style="margin: 8px 0;">
-          <select name="archive" onchange="this.form.submit()" style="width: 100%;">
-            <option value="">Select a channel…</option>
-            {% for f in archive_files %}
-              <option value="{{ f }}" {% if f == selected_archive %}selected{% endif %}>
-                {{ f[:-5] }}
-              </option>
-            {% endfor %}
-          </select>
-        </form>
-      </nav>
+  <div class="topbar">
+    <div class="topbar-left">
+      ↩️ <a class="back-link" href="/">Reply</a>
     </div>
+    <div class="topbar-title">Discord Channel Viewer</div>
+  </div>
 
-    <div class="sidebar-bottom">
-      <button class="jump-button" id="random-message-btn">Random Message</button>
-      <button class="jump-button" id="scroll-jump-btn">Jump to Top</button>
+  <div class="layout">
 
-      <div class="user-status-bar">
-        <div class="user-info-wrapper">
-          <img id="status-avatar"
-               src="{{ url_for('static', filename='avatar.png') }}"
-               alt="User Avatar">
+    <!-- Sidebar / channel picker -->
+    <aside class="sidebar">
+      <div class="sidebar-title">CURRENT CHANNEL</div>
 
-          <div class="user-info">
-            <div class="username">You</div>
-            <div class="status">Invisible</div>
-          </div>
+      <form class="channel-form" method="GET" action="/">
+        <select class="channel-select" name="channel" onchange="this.form.submit()">
+          <option value="">Select a channel…</option>
+          {% for f in archive_files %}
+            <option value="{{ f }}" {% if html_filename == f %}selected{% endif %}>{{ f[:-5] }}</option>
+          {% endfor %}
+        </select>
+      </form>
+
+      <div class="sidebar-actions">
+        <button class="btn" type="button" id="randomJumpBtn">Random Message</button>
+        <a class="btn" href="#top">Jump to Top</a>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+
+      <a id="top"></a>
+
+      <header class="header">
+        <div class="channel-name">
+          {{ "No Channel Selected" if html_filename == "No Channel Selected" else "#" + html_filename[:-5]|lower|replace(" ", "-") }}
         </div>
 
-        <div class="user-icons">
-          <button title="Mute">
-            <img src="{{ url_for('static', filename='icons/mic.svg') }}">
-          </button>
-          <button title="Deafen">
-            <img src="{{ url_for('static', filename='icons/headphones.svg') }}">
-          </button>
-          <button id="settings-btn" title="Settings">
-            <img class="settings-icon"
-                 src="{{ url_for('static', filename='icons/settings.svg') }}">
-          </button>
+        <!-- ✅ Search bar (added) -->
+        <div class="search-bar-container">
+          <input
+            id="search"
+            class="search-input"
+            type="text"
+            placeholder="Search messages"
+            autocomplete="off"
+          />
+          <button class="search-toggle-button" id="search-toggle" type="button" title="Search tips">▼</button>
         </div>
+      </header>
+
+      <!-- ✅ Search help panel (added) -->
+      <div class="search-help" id="search-help" hidden>
+        <div class="search-help-title">Search tips</div>
+        <div class="search-help-line">• Type to filter messages (username or text)</div>
+        <div class="search-help-line">• Press Esc to clear</div>
+        <div class="search-help-line">• Click ▼ to hide/show this panel</div>
       </div>
-    </div>
-  </aside>
 
-  <!-- MAIN -->
-  <main class="main">
-
-    <header class="header">
-      <div class="channel-name">
-        {{ "No Channel Selected" if html_filename == "No Channel Selected"
-           else "#" + html_filename[:-5]|lower|replace(" ", "-") }}
-      </div>
-    </header>
-
-    <!-- CHAT LOG -->
-    <div class="chatlog" id="chatlog">
-      {% for msg in messages %}
-      <div class="message" id="msg-{{ loop.index }}">
-
-        <img class="avatar fallback-avatar"
-             data-avatar="{{ msg.avatar }}"
-             data-username="{{ msg.username }}">
-
-        <div class="hover-wrap">
-          <div class="message-content">
-            <div class="meta">
-              <span class="message-nickname">{{ msg.username }}</span>
-              <span class="timestamp">{{ msg.timestamp }}</span>
+      <section class="messages" id="messages">
+        {% for msg in messages %}
+          <div class="message" data-jump-id="{{ loop.index }}">
+            <div class="message-header">
+              <span class="message-username">{{ msg.username }}</span>
+              <span class="message-timestamp">{{ msg.timestamp }}</span>
             </div>
+            <div class="message-content">{{ msg.content | safe }}</div>
 
-            <div class="content">
-              {{ msg.content | safe }}
-            </div>
+            <a class="jump-link" href="#jump-{{ loop.index }}" id="jump-{{ loop.index }}">Jump</a>
           </div>
-        </div>
+        {% endfor %}
+      </section>
 
-        <button class="jump-message-btn"
-                onclick="jumpToMessage('msg-{{ loop.index }}')">
-          Jump
-        </button>
-      </div>
-      {% endfor %}
-    </div>
+      <footer class="composer">
+        <button class="btn" type="button">Send</button>
+      </footer>
 
-    <!-- INPUT -->
-    <div class="input-area">
-      <textarea id="message-input"
-        placeholder="Message #{{ html_filename[:-5]|lower|replace(' ', '-') }}"></textarea>
-      <button id="send-button">Send</button>
-    </div>
+    </main>
+  </div>
 
-  </main>
-</div>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
 
-<script src="{{ url_for('static', filename='script.js') }}"></script>
+  <!-- ✅ Search logic (works even if your script.js has nothing) -->
+  <script>
+    (() => {
+      const input = document.getElementById("search");
+      const help = document.getElementById("search-help");
+      const toggle = document.getElementById("search-toggle");
+      const randomBtn = document.getElementById("randomJumpBtn");
 
+      if (!input) return;
+
+      const getMessages = () => Array.from(document.querySelectorAll(".message"));
+
+      function applyFilter(q) {
+        const query = (q || "").trim().toLowerCase();
+        const msgs = getMessages();
+
+        for (const msg of msgs) {
+          const user = (msg.querySelector(".message-username")?.textContent || "").toLowerCase();
+          const text = (msg.querySelector(".message-content")?.textContent || "").toLowerCase();
+          const match = !query || user.includes(query) || text.includes(query);
+          msg.style.display = match ? "" : "none";
+        }
+      }
+
+      input.addEventListener("input", () => applyFilter(input.value));
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          input.value = "";
+          applyFilter("");
+          input.blur();
+        }
+      });
+
+      if (toggle && help) {
+        toggle.addEventListener("click", () => {
+          help.hidden = !help.hidden;
+        });
+      }
+
+      if (randomBtn) {
+        randomBtn.addEventListener("click", () => {
+          const visible = getMessages().filter(m => m.style.display !== "none");
+          if (!visible.length) return;
+          const pick = visible[Math.floor(Math.random() * visible.length)];
+          pick.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+      }
+    })();
+  </script>
 </body>
 </html>
