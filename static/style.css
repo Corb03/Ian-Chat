@@ -141,6 +141,7 @@ html, body {
 .search-dropdown-button:hover {
     background-color: #40444b;
 }
+
 .search-bar-container {
   display: flex;
   align-items: center;
@@ -153,20 +154,21 @@ html, body {
 }
 
 .search-input {
+  padding-left: 80px;
   width: 100%;
-  padding-left: 12px; /* was 80px */
 }
 
 .search-count {
-  position: static;         /* was absolute */
-  transform: none;          /* remove */
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
   font-size: 12px;
   color: #b5bac1;
+  pointer-events: none;
   user-select: none;
   opacity: 1;
-  padding: 0 6px;
-  min-width: 48px;          /* keeps it from jittering */
-  text-align: right;
+  transition: opacity 0.2s ease;
 }
 
 .search-count.hidden {
