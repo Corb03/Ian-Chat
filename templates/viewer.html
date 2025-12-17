@@ -77,7 +77,38 @@
         {{ "No Channel Selected" if html_filename == "No Channel Selected"
            else "#" + html_filename[:-5]|lower|replace(" ", "-") }}
       </div>
+
+      <!-- ✅ Search UI (careful: minimal DOM for existing script.js) -->
+      <div class="search-bar-container" style="max-width: 420px;">
+        <div class="search-wrapper">
+          <input
+            id="search"
+            class="search-input"
+            type="text"
+            placeholder="Search messages"
+            autocomplete="off"
+            style="padding-left: 12px;"
+          />
+        </div>
+
+        <button class="search-toggle-button" id="search-toggle" type="button">ⓘ</button>
+      </div>
     </header>
+
+    <!-- ✅ Dropdown that your existing script toggles -->
+    <div class="search-help" id="search-help" style="display:none;">
+      <strong>Filters</strong>
+      <ul>
+        <li data-insert="has:link">has:link</li>
+        <li data-insert="from:">from:</li>
+      </ul>
+
+      <strong style="margin-top:10px; display:block;">Tips</strong>
+      <ul>
+        <li>Type to filter messages</li>
+        <li>Esc clears</li>
+      </ul>
+    </div>
 
     <!-- CHAT LOG -->
     <div class="chatlog" id="chatlog">
