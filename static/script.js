@@ -48,6 +48,10 @@ function applyFilters() {
   const query = (searchEl.value || "").toLowerCase().trim();
   const parts = query.match(/(?:[^\s"]+|"[^"]*")+/g) || [];
 
+  // ✅ ADD: result count (minimal)
+  const resultCounter = document.getElementById("search-result-count");
+  let visibleCount = 0;
+
   messages.forEach(({ element, content, username, hasLink }) => {
     let show = true;
 
@@ -69,7 +73,22 @@ function applyFilters() {
     }
 
     element.style.display = show ? "" : "none";
+
+    // ✅ ADD: count visible
+    if (show) visibleCount++;
   });
+
+  // ✅ ADD: update counter display
+  if (resultCounter) {
+    if (!query) {
+      resultCounter.style.display = "none";
+      resultCounter.textContent = "";
+    } else {
+      resultCounter.style.display = "block";
+      resultCounter.textContent =
+        visibleCount === 1 ? "1 result" : `${visibleCount} results`;
+    }
+  }
 
   highlightMatches(query);
 }
@@ -81,7 +100,6 @@ function highlightMatches(query) {
   const highlightable = terms.filter(
     (t) => !t.startsWith("has:") && !t.startsWith("from:")
   );
-
   if (highlightable.length === 0) return;
 }
 
@@ -117,7 +135,7 @@ function appendMessage(content) {
   if (!isGrouped) {
     const meta = document.createElement("div");
     meta.className = "meta";
-    meta.innerHTML = `${currentNickname} <span class="timestamp">${timestamp}</span>`;
+    meta.innerHTML = `${currentNickname} ${timestamp}`;
     msgContent.appendChild(meta);
   }
 
@@ -133,7 +151,8 @@ function appendMessage(content) {
   // Try to grab reactions from archived DOM (if present)
   try {
     const archivedMessages = document.querySelectorAll(".chatlog__message-container");
-    const corresponding = archivedMessages[archivedMessages.length - sentMessageCount - 1];
+    const corresponding =
+      archivedMessages[archivedMessages.length - sentMessageCount - 1];
     if (corresponding) {
       const reactions = corresponding.querySelector(".chatlog__reactions");
       if (reactions) container.appendChild(reactions.cloneNode(true));
@@ -164,17 +183,10 @@ function appendSystemMessage(newNick) {
 
   // Keep this simple (you can style in CSS)
   container.innerHTML = `
-    <div class="message-content">
-      <div class="meta">
-        <span class="message-nickname">Clyde BOT</span>
-        <span class="timestamp">${timestamp}</span>
-      </div>
-      <div class="content">
-        Your nickname on this server has been changed to <strong>[${newNick}]</strong>.
-        <span class="delete-hint" style="opacity:.65; margin-left:10px; cursor:pointer;">Only you can see this — delete this message</span>
-      </div>
-    </div>
-  `;
+Clyde BOT ${timestamp}
+
+Your nickname on this server has been changed to [${newNick}]. Only you can see this — delete this message
+`;
 
   const hint = container.querySelector(".delete-hint");
   if (hint) hint.addEventListener("click", () => container.remove());
@@ -398,12 +410,14 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ===== Settings overlay show/hide
-  document.querySelector('[data-section="my-account"]')?.addEventListener("click", () => {
-    const allSections = document.querySelectorAll(".settings-body > *");
-    allSections.forEach((el) => (el.style.display = "none"));
-    const myAccount = document.querySelector(".my-account");
-    if (myAccount) myAccount.style.display = "flex";
-  });
+  document
+    .querySelector('[data-section="my-account"]')
+    ?.addEventListener("click", () => {
+      const allSections = document.querySelectorAll(".settings-body > *");
+      allSections.forEach((el) => (el.style.display = "none"));
+      const myAccount = document.querySelector(".my-account");
+      if (myAccount) myAccount.style.display = "flex";
+    });
 
   document.getElementById("settings-btn")?.addEventListener("click", () => {
     const overlay = document.getElementById("settings-overlay");
@@ -442,6 +456,7 @@ document.addEventListener("DOMContentLoaded", () => {
   messages.forEach(({ element }) => {
     const nameEl = element.querySelector(".message-nickname");
     const timeEl = element.querySelector(".timestamp");
+
     const username = (nameEl?.textContent || "").trim();
     const timestamp = (timeEl?.textContent || "").trim();
 
